@@ -1,0 +1,6 @@
+dist/
+node_modules/
+gulp/version.json
+*.zip
+npm-debug.log
+yarn-error.log
