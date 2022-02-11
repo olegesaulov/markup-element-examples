@@ -1,0 +1,18 @@
+.content {
+    padding: $header-height + 20px 0 50px;
+
+    &__text {
+        font-size: 18px;
+        line-height: 150%;
+
+        p:not(:last-child) {
+            margin-bottom: 20px;
+        }
+    }
+
+    @media (max-width: $md) {
+        & {
+            padding: $mobile__header-height + 20px 0 50px;
+        }
+    }
+}

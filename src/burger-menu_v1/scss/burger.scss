@@ -1,0 +1,47 @@
+.header__burger {
+    position: relative;
+    z-index: 2;
+    display: none;
+    width: 30px;
+    height: 20px;
+
+    span,
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #fff;
+        transition: all 0.3s ease;
+    }
+
+    span {
+        top: calc(50% - 1px);
+    }
+
+    &::before {
+        top: 0;
+    }
+
+    &::after {
+        bottom: 0;
+    }
+
+    &.active {
+        span {
+            transform: scale(0);
+        }
+
+        &::before {
+            transform: rotate(45deg);
+            top: calc(50% - 1px);
+        }
+
+        &::after {
+            transform: rotate(-45deg);
+            bottom: calc(50% - 1px);
+        }
+    }
+}
