@@ -36,7 +36,6 @@
 
     &__burger {
         display: none;
-        cursor: pointer;
     }
 
     &__menu {
@@ -67,10 +66,6 @@
 
         &__logo {
             flex: 0 0 40px;
-        }
-
-        &__burger {
-            display: block;
         }
 
         &__menu {
@@ -104,3 +99,5 @@
         }
     }
 }
+
+@import "./burger.scss";
