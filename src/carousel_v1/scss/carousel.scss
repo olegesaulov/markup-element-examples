@@ -1,0 +1,98 @@
+.carousel {
+    &__arrow {
+        position: absolute;
+        top: 50%;
+        width: 0;
+        height: 0;
+        transform: translateY(-50%);
+        z-index: 1;
+        background: transparent;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease-in;
+
+        &:disabled {
+            cursor: default;
+        }
+    }
+
+    &__arrow--prev {
+        left: 10px;
+        border-right: 30px solid #fff;
+        border-top: 30px solid transparent;
+        border-bottom: 30px solid transparent;
+        box-shadow: 2px 0px 0 rgba(0, 0, 0, 0.2);
+
+        &:disabled {
+            border-right: 30px solid #ccc;
+        }
+    }
+
+    &__arrow--next {
+        right: 10px;
+        border-left: 30px solid #fff;
+        border-top: 30px solid transparent;
+        border-bottom: 30px solid transparent;
+        box-shadow: -2px 0px 0 rgba(0, 0, 0, 0.2);
+
+        &:disabled {
+            border-left: 30px solid #ccc;
+        }
+    }
+
+    &__dots {
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid #aaa;
+        margin-right: 10px;
+        cursor: pointer;
+
+        &:last-child {
+            margin-right: 0;
+        }
+
+        &--active {
+            background-color: #aaa;
+        }
+    }
+
+    &__content {
+        overflow: hidden;
+        position: relative;
+
+        &:hover {
+            .carousel__arrow {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+    }
+
+    &__track {
+        display: flex;
+        transition: all 0.2s;
+    }
+
+    &__item {
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 32px;
+
+        &:nth-child(odd) {
+            background: lightblue;
+        }
+        &:nth-child(even) {
+            background: lightgreen;
+        }
+    }
+}
