@@ -4,6 +4,9 @@ export const carousel = (options) => {
         itemsPerScroll = 1,
         initialSlide = 0,
         prefix = "carousel",
+        showArrows = true,
+        showDots = true,
+        enableArrowKeysNavigaiton = true,
     } = options;
 
     const container = document.querySelector(`.${prefix}`);
@@ -17,7 +20,7 @@ export const carousel = (options) => {
     let activeSlide = 0;
 
     const createArrows = () => {
-        if (itemsPerSlide >= itemsCount) {
+        if (!showArrows || itemsPerSlide >= itemsCount) {
             return [];
         }
 
@@ -33,7 +36,7 @@ export const carousel = (options) => {
     }
 
     const createDots = () => {
-        if (itemsPerSlide >= itemsCount) {
+        if (!showDots || itemsPerSlide >= itemsCount) {
             return [];
         }
 
@@ -67,17 +70,21 @@ export const carousel = (options) => {
         return -activeSlide * (itemsPerScroll * itemWidth);
     }
 
+    const isLeftArrowDisabled = () => activeSlide === 0;
+
+    const isRightArrowDisabled = () => activeSlide === slidesCount - 1;
+
     const updateTrackPositionStyle = (position) => {
         track.style.transform = `translateX(${position}px)`;
     }
 
     const updateArrowsStyle = () => {
         if (arrowPrev) {
-            arrowPrev.disabled = activeSlide === 0;
+            arrowPrev.disabled = isLeftArrowDisabled();
         }
 
         if (arrowNext) {
-            arrowNext.disabled = activeSlide === slidesCount - 1;
+            arrowNext.disabled = isRightArrowDisabled();
         }
     }
 
@@ -97,15 +104,23 @@ export const carousel = (options) => {
         updateDotsStyle();
     }
 
-    arrowPrev?.addEventListener("click", () => {
-        activeSlide -= 1;
-        onActiveSlideChanged();
-    });
+    const onPrevArrowClicked = () => {
+        if (!isLeftArrowDisabled()) {
+            activeSlide -= 1;
+            onActiveSlideChanged();
+        }
+    }
 
-    arrowNext?.addEventListener("click", () => {
-        activeSlide += 1;
-        onActiveSlideChanged();
-    });
+    const onNextArrowClicked = () => {
+        if (!isRightArrowDisabled()) {
+            activeSlide += 1;
+            onActiveSlideChanged();
+        }
+    }
+
+    arrowPrev?.addEventListener("click", onPrevArrowClicked);
+
+    arrowNext?.addEventListener("click", onNextArrowClicked);
 
     dotsContainer?.addEventListener("click", (event) => {
         if (!event.target.classList.contains(`${prefix}__dot`)) {
@@ -114,6 +129,23 @@ export const carousel = (options) => {
 
         activeSlide = dotItems?.indexOf(event.target);
         onActiveSlideChanged();
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (!enableArrowKeysNavigaiton) {
+            return;
+        }
+
+        switch (event.keyCode) {
+            case 37: { // left
+                onPrevArrowClicked();
+                break;
+            };
+            case 39: { // right
+                onNextArrowClicked();
+                break;
+            }
+        }
     });
 
     const init = () => {
