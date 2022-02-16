@@ -2,7 +2,7 @@ export const carousel = (options) => {
     const {
         itemsPerSlide = 1,
         itemsPerScroll = 1,
-        initialSlideIndex = 0,
+        initialSlide = 0,
         prefix = "carousel",
     } = options;
 
@@ -14,31 +14,32 @@ export const carousel = (options) => {
     const itemWidth = content.clientWidth / itemsPerSlide;
     const itemsCount = items.length;
     const slidesCount = 1 + Math.ceil((itemsCount - itemsPerSlide) / itemsPerScroll);
-    let activeSlideIndex = initialSlideIndex >= slidesCount ? slidesCount - 1 : initialSlideIndex;
+    let activeSlide = 0;
 
     const createArrows = () => {
+        if (itemsPerSlide >= itemsCount) {
+            return [];
+        }
+
         const arrowPrev = document.createElement('button');
-        const arrowNext = document.createElement('button');
         arrowPrev.className = `${prefix}__arrow ${prefix}__arrow--prev`;
-        arrowNext.className = `${prefix}__arrow ${prefix}__arrow--next`;
         content.prepend(arrowPrev);
+
+        const arrowNext = document.createElement('button');
+        arrowNext.className = `${prefix}__arrow ${prefix}__arrow--next`;
         content.append(arrowNext);
 
         return [arrowPrev, arrowNext];
     }
 
     const createDots = () => {
+        if (itemsPerSlide >= itemsCount) {
+            return [];
+        }
+
         const dotsContainer = document.createElement('div');
         dotsContainer.className = `${prefix}__dots`;
         container.append(dotsContainer);
-
-        if (itemsPerSlide >= itemsCount) {
-            return;
-        }
-
-        if (itemsPerScroll > itemsPerSlide) {
-            return;
-        }
 
         const dotItems = [];
         for (let i = 0; i < slidesCount; i++) {
@@ -55,65 +56,74 @@ export const carousel = (options) => {
     const [dotsContainer, dotItems] = createDots();
 
     const getTrackPosition = () => {
-        if (activeSlideIndex === 0) {
+        if (activeSlide === 0) {
             return 0;
         }
 
-        if (activeSlideIndex === slidesCount - 1) {
-            return -(itemsCount * itemWidth) + itemsPerSlide * itemWidth;
+        if (activeSlide === slidesCount - 1) {
+            return -(itemsCount * itemWidth) + (itemsPerSlide * itemWidth);
         }
 
-        return -(activeSlideIndex) * itemsPerScroll * itemWidth;
+        return -activeSlide * (itemsPerScroll * itemWidth);
     }
 
-    const setItemsWidthStyle = () => {
-        items.forEach(item => {
-            item.style.minWidth = `${itemWidth}px`;
-        });
-    }
-
-    const setTrackPositionStyle = (position) => {
+    const updateTrackPositionStyle = (position) => {
         track.style.transform = `translateX(${position}px)`;
     }
 
-    const setArrowsDisabledStyle = () => {
-        arrowPrev.disabled = activeSlideIndex === 0;
-        arrowNext.disabled = activeSlideIndex === slidesCount - 1;
+    const updateArrowsStyle = () => {
+        if (arrowPrev) {
+            arrowPrev.disabled = activeSlide === 0;
+        }
+
+        if (arrowNext) {
+            arrowNext.disabled = activeSlide === slidesCount - 1;
+        }
     }
 
-    const setActiveDotStyle = () => {
-        dotItems.forEach(dot => dot.classList.remove(`${prefix}__dot--active`));
-        dotItems[activeSlideIndex].classList.add(`${prefix}__dot--active`);
+    const updateDotsStyle = () => {
+        if (!dotItems) {
+            return;
+        }
+
+        const activeClass = `${prefix}__dot--active`;
+        dotItems.forEach(dot => dot.classList.remove(activeClass));
+        dotItems[activeSlide].classList.add(activeClass);
     }
 
-    arrowPrev.addEventListener("click", () => {
-        activeSlideIndex -= 1;
-        setTrackPositionStyle(getTrackPosition());
-        setArrowsDisabledStyle();
-        setActiveDotStyle();
+    const onActiveSlideChanged = () => {
+        updateTrackPositionStyle(getTrackPosition());
+        updateArrowsStyle();
+        updateDotsStyle();
+    }
+
+    arrowPrev?.addEventListener("click", () => {
+        activeSlide -= 1;
+        onActiveSlideChanged();
     });
 
-    arrowNext.addEventListener("click", () => {
-        activeSlideIndex += 1;
-        setTrackPositionStyle(getTrackPosition());
-        setArrowsDisabledStyle();
-        setActiveDotStyle();
+    arrowNext?.addEventListener("click", () => {
+        activeSlide += 1;
+        onActiveSlideChanged();
     });
 
-    dotsContainer.addEventListener("click", (event) => {
+    dotsContainer?.addEventListener("click", (event) => {
         if (!event.target.classList.contains(`${prefix}__dot`)) {
             return;
         }
 
-        activeSlideIndex = dotItems.indexOf(event.target);
-        setTrackPositionStyle(getTrackPosition());
-        setArrowsDisabledStyle();
-        setActiveDotStyle();
+        activeSlide = dotItems?.indexOf(event.target);
+        onActiveSlideChanged();
     });
 
-    setItemsWidthStyle();
+    const init = () => {
+        items.forEach(item => {
+            item.style.minWidth = `${itemWidth}px`;
+        });
 
-    setTrackPositionStyle(getTrackPosition());
-    setArrowsDisabledStyle();
-    setActiveDotStyle();
+        activeSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
+        onActiveSlideChanged();
+    }
+
+    init();
 };
