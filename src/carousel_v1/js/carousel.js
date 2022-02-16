@@ -6,7 +6,9 @@ export const carousel = (options) => {
         prefix = "carousel",
         showArrows = true,
         showDots = true,
-        enableArrowKeysNavigaiton = true,
+        enableArrowKeysNav = true,
+        enableCycleNav = true,
+        // enableLoop
     } = options;
 
     const container = document.querySelector(`.${prefix}`);
@@ -70,9 +72,9 @@ export const carousel = (options) => {
         return -activeSlide * (itemsPerScroll * itemWidth);
     }
 
-    const isLeftArrowDisabled = () => activeSlide === 0;
+    const isLeftArrowDisabled = () => !enableCycleNav && activeSlide === 0;
 
-    const isRightArrowDisabled = () => activeSlide === slidesCount - 1;
+    const isRightArrowDisabled = () => !enableCycleNav && activeSlide === slidesCount - 1;
 
     const updateTrackPositionStyle = (position) => {
         track.style.transform = `translateX(${position}px)`;
@@ -98,24 +100,29 @@ export const carousel = (options) => {
         dotItems[activeSlide].classList.add(activeClass);
     }
 
-    const onActiveSlideChanged = () => {
+    const setActiveSlide = (nextActiveSlide) => {
+        activeSlide = nextActiveSlide;
         updateTrackPositionStyle(getTrackPosition());
         updateArrowsStyle();
         updateDotsStyle();
     }
 
     const onPrevArrowClicked = () => {
-        if (!isLeftArrowDisabled()) {
-            activeSlide -= 1;
-            onActiveSlideChanged();
+        if (isLeftArrowDisabled()) {
+            return;
         }
+
+        const nextActiveSlide = activeSlide === 0 ? slidesCount - 1 : activeSlide - 1;
+        setActiveSlide(nextActiveSlide);
     }
 
     const onNextArrowClicked = () => {
-        if (!isRightArrowDisabled()) {
-            activeSlide += 1;
-            onActiveSlideChanged();
+        if (isRightArrowDisabled()) {
+            return;
         }
+
+        const nextActiveSlide = activeSlide === slidesCount - 1 ? 0 : activeSlide + 1;
+        setActiveSlide(nextActiveSlide);
     }
 
     arrowPrev?.addEventListener("click", onPrevArrowClicked);
@@ -127,12 +134,12 @@ export const carousel = (options) => {
             return;
         }
 
-        activeSlide = dotItems?.indexOf(event.target);
-        onActiveSlideChanged();
+        const nextActiveSlide = dotItems?.indexOf(event.target);
+        setActiveSlide(nextActiveSlide);
     });
 
     document.addEventListener("keydown", (event) => {
-        if (!enableArrowKeysNavigaiton) {
+        if (!enableArrowKeysNav) {
             return;
         }
 
@@ -153,8 +160,8 @@ export const carousel = (options) => {
             item.style.minWidth = `${itemWidth}px`;
         });
 
-        activeSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
-        onActiveSlideChanged();
+        const nextActiveSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
+        setActiveSlide(nextActiveSlide);
     }
 
     init();
