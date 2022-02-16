@@ -17,7 +17,7 @@ const defaultOptions = {
     showDots: true,
     enableArrowKeysNav: true,
     enableCycleNav: true,
-    enableAutoplay: false,
+    enableAutoplay: true,
     autoplaySpeed: 3000,
     autoplayDir: 'ltr',
 }
