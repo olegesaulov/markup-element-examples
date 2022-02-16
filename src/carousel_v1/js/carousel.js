@@ -2,7 +2,7 @@ export const carousel = (options) => {
     const {
         itemsPerSlide = 1,
         itemsPerScroll = 1,
-        initialSlide = 1,
+        initialSlideIndex = 0,
         prefix = "carousel",
     } = options;
 
@@ -13,8 +13,8 @@ export const carousel = (options) => {
 
     const itemWidth = content.clientWidth / itemsPerSlide;
     const itemsCount = items.length;
-    const slideCount = 1 + Math.ceil((itemsCount - itemsPerSlide) / itemsPerScroll);
-    let trackPosition = 0;
+    const slidesCount = 1 + Math.ceil((itemsCount - itemsPerSlide) / itemsPerScroll);
+    let activeSlideIndex = initialSlideIndex >= slidesCount ? slidesCount - 1 : initialSlideIndex;
 
     const createArrows = () => {
         const arrowPrev = document.createElement('button');
@@ -41,7 +41,7 @@ export const carousel = (options) => {
         }
 
         const dotItems = [];
-        for (let i = 0; i < slideCount; i++) {
+        for (let i = 0; i < slidesCount; i++) {
             const dot = document.createElement('span');
             dot.className = `${prefix}__dot`;
             dotsContainer.append(dot);
@@ -54,22 +54,16 @@ export const carousel = (options) => {
     const [arrowPrev, arrowNext] = createArrows();
     const [dotsContainer, dotItems] = createDots();
 
-    const getActiveSlideIndex = (currentPosition) => {
-        return
-    }
+    const getTrackPosition = () => {
+        if (activeSlideIndex === 0) {
+            return 0;
+        }
 
-    const getTrackPositionShift = (itemsLeft) => {
-        return itemsLeft >= itemsPerScroll
-            ? itemsPerScroll * itemWidth
-            : itemsLeft * itemWidth;
-    }
+        if (activeSlideIndex === slidesCount - 1) {
+            return -(itemsCount * itemWidth) + itemsPerSlide * itemWidth;
+        }
 
-    const getShownItemsCount = (currentPosition) => {
-        return (Math.abs(currentPosition) + itemsPerSlide * itemWidth) / itemWidth;
-    }
-
-    const handleDotClick = (index) => {
-
+        return -(activeSlideIndex) * itemsPerScroll * itemWidth;
     }
 
     const setItemsWidthStyle = () => {
@@ -78,28 +72,32 @@ export const carousel = (options) => {
         });
     }
 
-    const setTrackPositionStyle = () => {
-        track.style.transform = `translateX(${trackPosition}px)`;
+    const setTrackPositionStyle = (position) => {
+        track.style.transform = `translateX(${position}px)`;
     }
 
     const setArrowsDisabledStyle = () => {
-        arrowPrev.disabled = trackPosition === 0;
-        arrowNext.disabled = trackPosition <= -(itemsCount - itemsPerSlide) * itemWidth;
+        arrowPrev.disabled = activeSlideIndex === 0;
+        arrowNext.disabled = activeSlideIndex === slidesCount - 1;
+    }
+
+    const setActiveDotStyle = () => {
+        dotItems.forEach(dot => dot.classList.remove(`${prefix}__dot--active`));
+        dotItems[activeSlideIndex].classList.add(`${prefix}__dot--active`);
     }
 
     arrowPrev.addEventListener("click", () => {
-        const itemsLeft = Math.abs(trackPosition) / itemWidth;
-        trackPosition += getTrackPositionShift(itemsLeft);
-        setTrackPositionStyle();
+        activeSlideIndex -= 1;
+        setTrackPositionStyle(getTrackPosition());
         setArrowsDisabledStyle();
+        setActiveDotStyle();
     });
 
     arrowNext.addEventListener("click", () => {
-        const itemsShown = getShownItemsCount(trackPosition);
-        const itemsLeft = itemsCount - itemsShown;
-        trackPosition -= getTrackPositionShift(itemsLeft);
-        setTrackPositionStyle();
+        activeSlideIndex += 1;
+        setTrackPositionStyle(getTrackPosition());
         setArrowsDisabledStyle();
+        setActiveDotStyle();
     });
 
     dotsContainer.addEventListener("click", (event) => {
@@ -107,9 +105,15 @@ export const carousel = (options) => {
             return;
         }
 
-
-    })
+        activeSlideIndex = dotItems.indexOf(event.target);
+        setTrackPositionStyle(getTrackPosition());
+        setArrowsDisabledStyle();
+        setActiveDotStyle();
+    });
 
     setItemsWidthStyle();
+
+    setTrackPositionStyle(getTrackPosition());
     setArrowsDisabledStyle();
+    setActiveDotStyle();
 };
