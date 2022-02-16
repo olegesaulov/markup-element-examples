@@ -1,55 +1,75 @@
+const validateCarouselParams = (options) => {
+    const { autoplayDir } = options;
+
+    const msgPrefix = 'Carousel plugin error: '
+
+    if (!['ltr', 'rtl'].includes(autoplayDir)) {
+        return `${msgPrefix}autoplayDir option value should be either "ltr" or "rtl"`;
+    }
+}
+
+const defaultOptions = {
+    itemsPerSlide: 1,
+    itemsPerScroll: 1,
+    initialSlide: 0,
+    prefix: "carousel",
+    showArrows: true,
+    showDots: true,
+    enableArrowKeysNav: true,
+    enableCycleNav: true,
+    enableAutoplay: false,
+    autoplaySpeed: 3000,
+    autoplayDir: 'ltr',
+}
+
 export const carousel = (options) => {
-    const {
-        itemsPerSlide = 1,
-        itemsPerScroll = 1,
-        initialSlide = 0,
-        prefix = "carousel",
-        showArrows = true,
-        showDots = true,
-        enableArrowKeysNav = true,
-        enableCycleNav = true,
-        // enableLoop
-    } = options;
+    const params = { ...defaultOptions, ...options };
 
-    const container = document.querySelector(`.${prefix}`);
-    const content = document.querySelector(`.${prefix}__content`);
-    const track = document.querySelector(`.${prefix}__track`);
-    const items = document.querySelectorAll(`.${prefix}__item`);
+    const errorMsg = validateCarouselParams(params);
+    if (errorMsg) {
+        throw new Error(errorMsg);
+    }
 
-    const itemWidth = content.clientWidth / itemsPerSlide;
+    const container = document.querySelector(`.${params.prefix}`);
+    const content = document.querySelector(`.${params.prefix}__content`);
+    const track = document.querySelector(`.${params.prefix}__track`);
+    const items = document.querySelectorAll(`.${params.prefix}__item`);
+
+    const itemWidth = content.clientWidth / params.itemsPerSlide;
     const itemsCount = items.length;
-    const slidesCount = 1 + Math.ceil((itemsCount - itemsPerSlide) / itemsPerScroll);
+    const slidesCount = 1 + Math.ceil((itemsCount - params.itemsPerSlide) / params.itemsPerScroll);
     let activeSlide = 0;
+    let interval = null;
 
     const createArrows = () => {
-        if (!showArrows || itemsPerSlide >= itemsCount) {
+        if (!params.showArrows || params.itemsPerSlide >= itemsCount) {
             return [];
         }
 
         const arrowPrev = document.createElement('button');
-        arrowPrev.className = `${prefix}__arrow ${prefix}__arrow--prev`;
+        arrowPrev.className = `${params.prefix}__arrow ${params.prefix}__arrow--prev`;
         content.prepend(arrowPrev);
 
         const arrowNext = document.createElement('button');
-        arrowNext.className = `${prefix}__arrow ${prefix}__arrow--next`;
+        arrowNext.className = `${params.prefix}__arrow ${params.prefix}__arrow--next`;
         content.append(arrowNext);
 
         return [arrowPrev, arrowNext];
     }
 
     const createDots = () => {
-        if (!showDots || itemsPerSlide >= itemsCount) {
+        if (!params.showDots || params.itemsPerSlide >= itemsCount) {
             return [];
         }
 
         const dotsContainer = document.createElement('div');
-        dotsContainer.className = `${prefix}__dots`;
+        dotsContainer.className = `${params.prefix}__dots`;
         container.append(dotsContainer);
 
         const dotItems = [];
         for (let i = 0; i < slidesCount; i++) {
             const dot = document.createElement('span');
-            dot.className = `${prefix}__dot`;
+            dot.className = `${params.prefix}__dot`;
             dotsContainer.append(dot);
             dotItems.push(dot);
         }
@@ -66,15 +86,15 @@ export const carousel = (options) => {
         }
 
         if (activeSlide === slidesCount - 1) {
-            return -(itemsCount * itemWidth) + (itemsPerSlide * itemWidth);
+            return -(itemsCount * itemWidth) + (params.itemsPerSlide * itemWidth);
         }
 
-        return -activeSlide * (itemsPerScroll * itemWidth);
+        return -activeSlide * (params.itemsPerScroll * itemWidth);
     }
 
-    const isLeftArrowDisabled = () => !enableCycleNav && activeSlide === 0;
+    const isLeftArrowDisabled = () => !params.enableCycleNav && activeSlide === 0;
 
-    const isRightArrowDisabled = () => !enableCycleNav && activeSlide === slidesCount - 1;
+    const isRightArrowDisabled = () => !params.enableCycleNav && activeSlide === slidesCount - 1;
 
     const updateTrackPositionStyle = (position) => {
         track.style.transform = `translateX(${position}px)`;
@@ -95,7 +115,7 @@ export const carousel = (options) => {
             return;
         }
 
-        const activeClass = `${prefix}__dot--active`;
+        const activeClass = `${params.prefix}__dot--active`;
         dotItems.forEach(dot => dot.classList.remove(activeClass));
         dotItems[activeSlide].classList.add(activeClass);
     }
@@ -107,7 +127,11 @@ export const carousel = (options) => {
         updateDotsStyle();
     }
 
-    const onPrevArrowClicked = () => {
+    const onPrevArrowClicked = (_clearInterval = true) => {
+        if (_clearInterval) {
+            clearInterval(interval);
+        }
+
         if (isLeftArrowDisabled()) {
             return;
         }
@@ -116,7 +140,11 @@ export const carousel = (options) => {
         setActiveSlide(nextActiveSlide);
     }
 
-    const onNextArrowClicked = () => {
+    const onNextArrowClicked = (_clearInterval = true) => {
+        if (_clearInterval) {
+            clearInterval(interval);
+        }
+
         if (isRightArrowDisabled()) {
             return;
         }
@@ -125,21 +153,26 @@ export const carousel = (options) => {
         setActiveSlide(nextActiveSlide);
     }
 
-    arrowPrev?.addEventListener("click", onPrevArrowClicked);
+    const onDotClicked = (dot) => {
+        clearInterval(interval);
+        const nextActiveSlide = dotItems?.indexOf(dot);
+        setActiveSlide(nextActiveSlide);
+    }
 
-    arrowNext?.addEventListener("click", onNextArrowClicked);
+    arrowPrev?.addEventListener("click", () => onPrevArrowClicked());
+
+    arrowNext?.addEventListener("click", () => onNextArrowClicked());
 
     dotsContainer?.addEventListener("click", (event) => {
-        if (!event.target.classList.contains(`${prefix}__dot`)) {
+        if (!event.target.classList.contains(`${params.prefix}__dot`)) {
             return;
         }
 
-        const nextActiveSlide = dotItems?.indexOf(event.target);
-        setActiveSlide(nextActiveSlide);
+        onDotClicked(event.target);
     });
 
     document.addEventListener("keydown", (event) => {
-        if (!enableArrowKeysNav) {
+        if (!params.enableArrowKeysNav) {
             return;
         }
 
@@ -160,8 +193,13 @@ export const carousel = (options) => {
             item.style.minWidth = `${itemWidth}px`;
         });
 
-        const nextActiveSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
+        const nextActiveSlide = params.initialSlide >= slidesCount ? slidesCount - 1 : params.initialSlide;
         setActiveSlide(nextActiveSlide);
+
+        if (params.enableAutoplay) {
+            const intervalFunc = params.autoplayDir === 'ltr' ? onNextArrowClicked : onPrevArrowClicked;
+            interval = setInterval(() => intervalFunc(false), params.autoplaySpeed);
+        }
     }
 
     init();
