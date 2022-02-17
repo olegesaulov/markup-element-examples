@@ -31,3 +31,15 @@ export const validateParams = (options) => {
         return makeMsg("autoplayDir value should be either \"ltr\" or \"rtl\"");
     }
 }
+
+export const validateUpdatedParams = (prevOptions, nextOptions) => {
+    const errorMsg = validateParams(nextOptions);
+
+    if (errorMsg) {
+        return errorMsg;
+    }
+
+    if (prevOptions.prefix !== nextOptions.prefix) {
+        return makeMsg("prefix value could not be updated");
+    }
+}

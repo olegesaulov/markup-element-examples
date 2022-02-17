@@ -1,11 +1,11 @@
-import { validateParams } from "./validator.js";
+import { validateParams, validateUpdatedParams } from "./validator.js";
 import { CarouselDOM } from "./DOM.js";
 
 const defaultOptions = {
+    prefix: "carousel",
+    initialSlide: 0,
     itemsPerSlide: 1,
     itemsPerScroll: 1,
-    initialSlide: 0,
-    prefix: "carousel",
     showArrows: true,
     showDots: true,
     enableArrowKeysNav: true,
@@ -13,78 +13,73 @@ const defaultOptions = {
     enableAutoplay: true,
     autoplaySpeed: 3000,
     autoplayDir: 'ltr',
-}
+};
 
 export class Carousel {
     constructor(options) {
-        this._params = { ...defaultOptions, ...options };
+        const params = { ...defaultOptions, ...options };
 
-        const errorMsg = validateParams(this._params);
+        const errorMsg = validateParams(params);
         if (errorMsg) {
             throw new Error(errorMsg);
         }
-    }
 
-    init() {
-        const setInitialSlide = () => {
-            const { initialSlide, slidesCount } = this._params;
-
-            const nextActiveSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
-            this._setActiveSlide(nextActiveSlide);
-        }
-
-        const enableAutoplay = () => {
-            if (!this._params.enableAutoplay) {
-                return;
-            }
-
-            const intervalFunc = this._params.autoplayDir === 'ltr'
-                ? this._onNextArrowClick
-                : this._onPrevArrowClick;
-            this._interval = setInterval(() => intervalFunc(false), this._params.autoplaySpeed);
-        }
-
-        const makeArrows = () => {
-            const { showArrows, itemsPerSlide, itemsCount } = this._params;
-
-            if (!showArrows || itemsPerSlide >= itemsCount) {
-                return [];
-            }
-
-            return this._carouselDOM.createArrows(this._elements.content);
-        }
-
-        const makeDots = () => {
-            const { showDots, itemsPerSlide, itemsCount, slidesCount } = this._params;
-
-            if (!showDots || itemsPerSlide >= itemsCount) {
-                return [];
-            }
-
-            return this._carouselDOM.createDots(this._elements.container, slidesCount);
-        }
-
+        this._params = params;
         this._carouselDOM = new CarouselDOM(this._params.prefix);
         this._elements = this._carouselDOM.findMainCarouselElements();
-        this._params = {
-            ...this._params,
-            itemWidth: this._elements.content.clientWidth / this._params.itemsPerSlide,
-            itemsCount: this._elements.items.length,
-            slidesCount: 1 + Math.ceil(
-                (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
-            ),
-            activeSlide: 0,
-        };
-        this._elements = {
-            ...this._elements,
-            ...makeArrows(),
-            ...makeDots(),
-        };
-        this._interval = null;
+        this._update();
+    }
 
-        this._carouselDOM.setMinWidth(this._elements.items, this._params.itemWidth);
-        setInitialSlide();
-        enableAutoplay();
+    updateParams(options) {
+        const nextParams = { ...this._params, ...options };
+
+        const errorMsg = validateUpdatedParams(this._params, nextParams);
+        if (errorMsg) {
+            throw new Error(errorMsg);
+        }
+
+        this._params = nextParams;
+        this._update();
+    }
+
+    _update() {
+        const updateUI = () => {
+            const remakeArrows = () => {
+                const { showArrows, itemsPerSlide, itemsCount } = this._params;
+
+                this._carouselDOM.removeItems([this._elements.arrowPrev, this._elements.arrowNext]);
+
+                if (!showArrows || itemsPerSlide >= itemsCount) {
+                    return [];
+                }
+
+                return this._carouselDOM.createArrows(this._elements.content);
+            }
+
+            const remakeDots = () => {
+                const { showDots, itemsPerSlide, itemsCount, slidesCount } = this._params;
+
+                this._carouselDOM.removeItems([this._elements.dotsContainer]);
+
+                if (!showDots || itemsPerSlide >= itemsCount) {
+                    return [];
+                }
+
+                return this._carouselDOM.createDots(this._elements.container, slidesCount);
+            }
+
+            this._elements = {
+                ...this._elements,
+                ...remakeArrows(),
+                ...remakeDots(),
+            };
+            this._carouselDOM.setMinWidth(this._elements.items, this._params.itemWidth);
+            this._setInitialSlide();
+        }
+
+        this._recalcAdditionalParams();
+        updateUI();
+        this._setUpAutoplay();
         this._initEventHandlers();
     }
 
@@ -93,6 +88,18 @@ export class Carousel {
         MAIN LOGIC
         //////////////////////////////////////////////////////////////////////
     */
+
+    _recalcAdditionalParams() {
+        this._params = {
+            ...this._params,
+            activeSlide: 0,
+            itemWidth: this._elements.content.clientWidth / this._params.itemsPerSlide,
+            itemsCount: this._elements.items.length,
+            slidesCount: 1 + Math.ceil(
+                (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
+            ),
+        };
+    }
 
     _getTrackPosition() {
         const {
@@ -143,6 +150,26 @@ export class Carousel {
         this._updateActiveDot();
     }
 
+    _setInitialSlide() {
+        const { initialSlide, slidesCount } = this._params;
+
+        const nextActiveSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
+        this._setActiveSlide(nextActiveSlide);
+    }
+
+    _setUpAutoplay() {
+        clearInterval(this._interval);
+
+        if (!this._params.enableAutoplay) {
+            return;
+        }
+
+        const autoplayFunc = this._params.autoplayDir === 'ltr'
+            ? this._onNextArrowClick
+            : this._onPrevArrowClick;
+        this._interval = setInterval(() => autoplayFunc(false), this._params.autoplaySpeed);
+    }
+
     /*
         //////////////////////////////////////////////////////////////////////
         EVENT HANDLERS
@@ -186,6 +213,23 @@ export class Carousel {
         this._setActiveSlide(nextActiveSlide);
     }
 
+    _onKeydown = (event) => {
+        if (!this._params.enableArrowKeysNav) {
+            return;
+        }
+
+        switch (event.keyCode) {
+            case 37: { // left
+                this._onPrevArrowClick();
+                break;
+            }
+            case 39: { // right
+                this._onNextArrowClick();
+                break;
+            }
+        }
+    }
+
     _initEventHandlers() {
         const { arrowPrev, arrowNext, dotsContainer } = this._elements;
 
@@ -201,21 +245,7 @@ export class Carousel {
             this._onDotClick(event.target);
         });
 
-        document.addEventListener("keydown", (event) => {
-            if (!this._params.enableArrowKeysNav) {
-                return;
-            }
-
-            switch (event.keyCode) {
-                case 37: { // left
-                    this._onPrevArrowClick();
-                    break;
-                }
-                case 39: { // right
-                    this._onNextArrowClick();
-                    break;
-                }
-            }
-        });
+        document.removeEventListener("keydown", this._onKeydown);
+        document.addEventListener("keydown", this._onKeydown);
     }
 }

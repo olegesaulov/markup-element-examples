@@ -35,6 +35,14 @@ export class CarouselDOM {
         item.disabled = value;
     }
 
+    removeItems(items) {
+        if (!items || !items.length) {
+            return;
+        }
+
+        items.forEach(item => item?.remove())
+    }
+
     /*
         //////////////////////////////////////////////////////////////////////
         MAIN ELEMENTS
@@ -56,13 +64,17 @@ export class CarouselDOM {
         //////////////////////////////////////////////////////////////////////
     */
 
+    getArrowClassName() {
+        return `${this._prefix}__arrow`;
+    }
+
     createArrows(container) {
         const arrowPrev = document.createElement('button');
-        arrowPrev.className = `${this._prefix}__arrow ${this._prefix}__arrow--prev`;
+        arrowPrev.className = `${this.getArrowClassName()} ${this.getArrowClassName()}--prev`;
         container.prepend(arrowPrev);
 
         const arrowNext = document.createElement('button');
-        arrowNext.className = `${this._prefix}__arrow ${this._prefix}__arrow--next`;
+        arrowNext.className = `${this.getArrowClassName()} ${this.getArrowClassName()}--next`;
         container.append(arrowNext);
 
         return { arrowPrev, arrowNext };
@@ -79,7 +91,7 @@ export class CarouselDOM {
     }
 
     getActiveDotClassName() {
-        return `${this._prefix}__dot--active`;
+        return `${this.getDotClassName()}--active`;
     }
 
     createDots(container, count) {
