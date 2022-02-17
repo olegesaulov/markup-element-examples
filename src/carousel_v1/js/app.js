@@ -1,6 +1,7 @@
-import { carousel } from "./carousel.js";
+import { Carousel } from "./carousel/carousel.js";
 
-carousel({
+const carousel = new Carousel({
     itemsPerSlide: 3,
     itemsPerScroll: 2,
 });
+carousel.init();

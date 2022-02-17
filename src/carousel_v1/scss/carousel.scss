@@ -25,11 +25,19 @@
     &__arrow--prev {
         left: 15px;
         transform: translateY(-50%) rotate(135deg);
+
+        &:hover {
+            transform: translateY(-50%) rotate(135deg) scale(1.2);
+        }
     }
 
     &__arrow--next {
         right: 15px;
         transform: translateY(-50%) rotate(-45deg);
+
+        &:hover {
+            transform: translateY(-50%) rotate(-45deg) scale(1.2);
+        }
     }
 
     &__dots {
