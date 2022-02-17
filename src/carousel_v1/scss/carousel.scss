@@ -78,14 +78,15 @@
 
     &__track {
         display: flex;
+        align-items: center;
         transition: all 0.2s;
     }
 
     &__item {
-        height: 300px;
         display: flex;
         justify-content: center;
         align-items: center;
+        height: 300px;
         font-size: 32px;
         position: relative;
 

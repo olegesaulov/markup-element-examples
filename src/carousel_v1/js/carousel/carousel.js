@@ -17,9 +17,9 @@ const defaultOptions = {
 
 export class Carousel {
     constructor(options) {
-        this.params = { ...defaultOptions, ...options };
+        this._params = { ...defaultOptions, ...options };
 
-        const errorMsg = validateParams(this.params);
+        const errorMsg = validateParams(this._params);
         if (errorMsg) {
             throw new Error(errorMsg);
         }
@@ -27,65 +27,65 @@ export class Carousel {
 
     init() {
         const setInitialSlide = () => {
-            const { initialSlide, slidesCount } = this.params;
+            const { initialSlide, slidesCount } = this._params;
 
             const nextActiveSlide = initialSlide >= slidesCount ? slidesCount - 1 : initialSlide;
-            this.setActiveSlide(nextActiveSlide);
+            this._setActiveSlide(nextActiveSlide);
         }
 
         const enableAutoplay = () => {
-            if (!this.params.enableAutoplay) {
+            if (!this._params.enableAutoplay) {
                 return;
             }
 
-            const intervalFunc = this.params.autoplayDir === 'ltr'
-                ? this.onNextArrowClick
-                : this.onPrevArrowClick;
-            this.interval = setInterval(() => intervalFunc(false), this.params.autoplaySpeed);
+            const intervalFunc = this._params.autoplayDir === 'ltr'
+                ? this._onNextArrowClick
+                : this._onPrevArrowClick;
+            this._interval = setInterval(() => intervalFunc(false), this._params.autoplaySpeed);
         }
 
         const makeArrows = () => {
-            const { showArrows, itemsPerSlide, itemsCount } = this.params;
+            const { showArrows, itemsPerSlide, itemsCount } = this._params;
 
             if (!showArrows || itemsPerSlide >= itemsCount) {
                 return [];
             }
 
-            return this.carouselDOM.createArrows(this.elements.content);
+            return this._carouselDOM.createArrows(this._elements.content);
         }
 
         const makeDots = () => {
-            const { showDots, itemsPerSlide, itemsCount, slidesCount } = this.params;
+            const { showDots, itemsPerSlide, itemsCount, slidesCount } = this._params;
 
             if (!showDots || itemsPerSlide >= itemsCount) {
                 return [];
             }
 
-            return this.carouselDOM.createDots(this.elements.container, slidesCount);
+            return this._carouselDOM.createDots(this._elements.container, slidesCount);
         }
 
-        this.carouselDOM = new CarouselDOM(this.params.prefix);
-        this.elements = this.carouselDOM.findMainCarouselElements();
-        this.params = {
-            ...this.params,
-            itemWidth: this.elements.content.clientWidth / this.params.itemsPerSlide,
-            itemsCount: this.elements.items.length,
+        this._carouselDOM = new CarouselDOM(this._params.prefix);
+        this._elements = this._carouselDOM.findMainCarouselElements();
+        this._params = {
+            ...this._params,
+            itemWidth: this._elements.content.clientWidth / this._params.itemsPerSlide,
+            itemsCount: this._elements.items.length,
             slidesCount: 1 + Math.ceil(
-                (this.elements.items.length - this.params.itemsPerSlide) / this.params.itemsPerScroll
+                (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
             ),
             activeSlide: 0,
         };
-        this.elements = {
-            ...this.elements,
+        this._elements = {
+            ...this._elements,
             ...makeArrows(),
             ...makeDots(),
         };
-        this.interval = null;
+        this._interval = null;
 
-        this.carouselDOM.setMinWidth(this.elements.items, this.params.itemWidth);
+        this._carouselDOM.setMinWidth(this._elements.items, this._params.itemWidth);
         setInitialSlide();
         enableAutoplay();
-        this.initEventHandlers();
+        this._initEventHandlers();
     }
 
     /*
@@ -94,7 +94,7 @@ export class Carousel {
         //////////////////////////////////////////////////////////////////////
     */
 
-    getTrackPosition() {
+    _getTrackPosition() {
         const {
             activeSlide,
             slidesCount,
@@ -102,7 +102,7 @@ export class Carousel {
             itemWidth,
             itemsPerSlide,
             itemsPerScroll,
-        } = this.params;
+        } = this._params;
 
         if (activeSlide === 0) {
             return 0;
@@ -115,32 +115,32 @@ export class Carousel {
         return -activeSlide * (itemsPerScroll * itemWidth);
     }
 
-    isPrevArrowDisabled() {
-        return !this.params.enableCycleNav && this.params.activeSlide === 0;
+    _isPrevArrowDisabled() {
+        return !this._params.enableCycleNav && this._params.activeSlide === 0;
     }
 
-    isNextArrowDisabled() {
-        return !this.params.enableCycleNav && this.params.activeSlide === this.params.slidesCount - 1;
+    _isNextArrowDisabled() {
+        return !this._params.enableCycleNav && this._params.activeSlide === this._params.slidesCount - 1;
     }
 
-    updateTrackPosition(position) {
-        this.carouselDOM.setTranslateX(this.elements.track, position);
+    _updateTrackPosition(position) {
+        this._carouselDOM.setTranslateX(this._elements.track, position);
     }
 
-    updateDisabledArrows() {
-        this.carouselDOM.setDisabled(this.elements.arrowPrev, this.isPrevArrowDisabled());
-        this.carouselDOM.setDisabled(this.elements.arrowNext, this.isNextArrowDisabled());
+    _updateDisabledArrows() {
+        this._carouselDOM.setDisabled(this._elements.arrowPrev, this._isPrevArrowDisabled());
+        this._carouselDOM.setDisabled(this._elements.arrowNext, this._isNextArrowDisabled());
     }
 
-    updateActiveDot() {
-        this.carouselDOM.setActiveDot(this.elements.dotItems, this.params.activeSlide);
+    _updateActiveDot() {
+        this._carouselDOM.setActiveDot(this._elements.dotItems, this._params.activeSlide);
     }
 
-    setActiveSlide(nextActiveSlide) {
-        this.params.activeSlide = nextActiveSlide;
-        this.updateTrackPosition(this.getTrackPosition());
-        this.updateDisabledArrows();
-        this.updateActiveDot();
+    _setActiveSlide(nextActiveSlide) {
+        this._params.activeSlide = nextActiveSlide;
+        this._updateTrackPosition(this._getTrackPosition());
+        this._updateDisabledArrows();
+        this._updateActiveDot();
     }
 
     /*
@@ -149,70 +149,70 @@ export class Carousel {
         //////////////////////////////////////////////////////////////////////
     */
 
-    onPrevArrowClick = (_clearInterval = true) => {
+    _onPrevArrowClick = (_clearInterval = true) => {
         if (_clearInterval) {
-            clearInterval(this.interval);
+            clearInterval(this._interval);
         }
 
-        if (this.isPrevArrowDisabled()) {
+        if (this._isPrevArrowDisabled()) {
             return;
         }
 
-        const nextActiveSlide = this.params.activeSlide === 0
-            ? this.params.slidesCount - 1
-            : this.params.activeSlide - 1;
-        this.setActiveSlide(nextActiveSlide);
+        const nextActiveSlide = this._params.activeSlide === 0
+            ? this._params.slidesCount - 1
+            : this._params.activeSlide - 1;
+        this._setActiveSlide(nextActiveSlide);
     }
 
-    onNextArrowClick = (_clearInterval = true) => {
+    _onNextArrowClick = (_clearInterval = true) => {
         if (_clearInterval) {
-            clearInterval(this.interval);
+            clearInterval(this._interval);
         }
 
-        if (this.isNextArrowDisabled()) {
+        if (this._isNextArrowDisabled()) {
             return;
         }
 
-        const nextActiveSlide = this.params.activeSlide === this.params.slidesCount - 1
+        const nextActiveSlide = this._params.activeSlide === this._params.slidesCount - 1
             ? 0
-            : this.params.activeSlide + 1;
-        this.setActiveSlide(nextActiveSlide);
+            : this._params.activeSlide + 1;
+        this._setActiveSlide(nextActiveSlide);
     }
 
-    onDotClick = (dot) => {
-        clearInterval(this.interval);
+    _onDotClick = (dot) => {
+        clearInterval(this._interval);
 
-        const nextActiveSlide = this.elements.dotItems?.indexOf(dot);
-        this.setActiveSlide(nextActiveSlide);
+        const nextActiveSlide = this._elements.dotItems?.indexOf(dot);
+        this._setActiveSlide(nextActiveSlide);
     }
 
-    initEventHandlers() {
-        const { arrowPrev, arrowNext, dotsContainer } = this.elements;
+    _initEventHandlers() {
+        const { arrowPrev, arrowNext, dotsContainer } = this._elements;
 
-        arrowPrev?.addEventListener("click", () => this.onPrevArrowClick());
+        arrowPrev?.addEventListener("click", () => this._onPrevArrowClick());
 
-        arrowNext?.addEventListener("click", () => this.onNextArrowClick());
+        arrowNext?.addEventListener("click", () => this._onNextArrowClick());
 
         dotsContainer?.addEventListener("click", (event) => {
-            if (!event.target.classList.contains(this.carouselDOM.getDotClassName())) {
+            if (!event.target.classList.contains(this._carouselDOM.getDotClassName())) {
                 return;
             }
 
-            this.onDotClick(event.target);
+            this._onDotClick(event.target);
         });
 
         document.addEventListener("keydown", (event) => {
-            if (!this.params.enableArrowKeysNav) {
+            if (!this._params.enableArrowKeysNav) {
                 return;
             }
 
             switch (event.keyCode) {
                 case 37: { // left
-                    this.onPrevArrowClick();
+                    this._onPrevArrowClick();
                     break;
                 }
                 case 39: { // right
-                    this.onNextArrowClick();
+                    this._onNextArrowClick();
                     break;
                 }
             }

@@ -1,6 +1,6 @@
 export class CarouselDOM {
     constructor(prefix) {
-        this.prefix = prefix;
+        this._prefix = prefix;
     }
 
     /*
@@ -43,10 +43,10 @@ export class CarouselDOM {
 
     findMainCarouselElements() {
         return {
-            container: document.querySelector(`.${this.prefix}`),
-            content: document.querySelector(`.${this.prefix}__content`),
-            track: document.querySelector(`.${this.prefix}__track`),
-            items: document.querySelectorAll(`.${this.prefix}__item`),
+            container: document.querySelector(`.${this._prefix}`),
+            content: document.querySelector(`.${this._prefix}__content`),
+            track: document.querySelector(`.${this._prefix}__track`),
+            items: document.querySelectorAll(`.${this._prefix}__item`),
         }
     }
 
@@ -58,11 +58,11 @@ export class CarouselDOM {
 
     createArrows(container) {
         const arrowPrev = document.createElement('button');
-        arrowPrev.className = `${this.prefix}__arrow ${this.prefix}__arrow--prev`;
+        arrowPrev.className = `${this._prefix}__arrow ${this._prefix}__arrow--prev`;
         container.prepend(arrowPrev);
 
         const arrowNext = document.createElement('button');
-        arrowNext.className = `${this.prefix}__arrow ${this.prefix}__arrow--next`;
+        arrowNext.className = `${this._prefix}__arrow ${this._prefix}__arrow--next`;
         container.append(arrowNext);
 
         return { arrowPrev, arrowNext };
@@ -75,16 +75,16 @@ export class CarouselDOM {
     */
 
     getDotClassName() {
-        return `${this.prefix}__dot`;
+        return `${this._prefix}__dot`;
     }
 
     getActiveDotClassName() {
-        return `${this.prefix}__dot--active`;
+        return `${this._prefix}__dot--active`;
     }
 
     createDots(container, count) {
         const dotsContainer = document.createElement('div');
-        dotsContainer.className = `${this.prefix}__dots`;
+        dotsContainer.className = `${this._prefix}__dots`;
         container.append(dotsContainer);
 
         const dotItems = [];
