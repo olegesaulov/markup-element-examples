@@ -93,12 +93,16 @@ export class Carousel {
         this._params = {
             ...this._params,
             activeSlide: 0,
-            itemWidth: this._elements.content.clientWidth / this._params.itemsPerSlide,
+            itemWidth: this._getItemWidth(),
             itemsCount: this._elements.items.length,
             slidesCount: 1 + Math.ceil(
                 (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
             ),
         };
+    }
+
+    _getItemWidth() {
+        return this._elements.content.clientWidth / this._params.itemsPerSlide;
     }
 
     _getTrackPosition() {
@@ -230,6 +234,16 @@ export class Carousel {
         }
     }
 
+    _onResize = (event) => {
+        const updateItemsWidth = () => {
+            this._params.itemWidth = this._getItemWidth();
+            this._carouselDOM.setMinWidth(this._elements.items, this._params.itemWidth);
+        }
+
+        updateItemsWidth();
+        this._updateTrackPosition(this._getTrackPosition());
+    }
+
     _initEventHandlers() {
         const { arrowPrev, arrowNext, dotsContainer } = this._elements;
 
@@ -247,5 +261,8 @@ export class Carousel {
 
         document.removeEventListener("keydown", this._onKeydown);
         document.addEventListener("keydown", this._onKeydown);
+
+        window.removeEventListener("resize", this._onResize);
+        window.addEventListener("resize", this._onResize);
     }
 }
