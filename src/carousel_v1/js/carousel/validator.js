@@ -1,3 +1,5 @@
+import { AUTOPLAY_DIRS, DISTANCE_TO_SWIPE } from "./constant.js";
+
 const makeMsg = (msgContent, msgPrefix = 'Carousel plugin error: ') => {
     return `${msgPrefix}${msgContent}`;
 }
@@ -9,6 +11,7 @@ export const validateParams = (options) => {
         initialSlide,
         autoplaySpeed,
         autoplayDir,
+        distanceToSwipe,
     } = options;
 
     if (itemsPerSlide <= 0) {
@@ -27,8 +30,12 @@ export const validateParams = (options) => {
         return makeMsg("autoplaySpeed value should be greater than 0");
     }
 
-    if (!['ltr', 'rtl'].includes(autoplayDir)) {
-        return makeMsg("autoplayDir value should be either \"ltr\" or \"rtl\"");
+    if (!Object.values(AUTOPLAY_DIRS).includes(autoplayDir)) {
+        return makeMsg(`autoplayDir value should be one of [${Object.values(AUTOPLAY_DIRS).join(", ")}]`);
+    }
+
+    if (!Object.values(DISTANCE_TO_SWIPE).includes(distanceToSwipe)) {
+        return makeMsg(`distanceToSwipe value should be one of [${Object.values(DISTANCE_TO_SWIPE).join(", ")}]`);
     }
 }
 

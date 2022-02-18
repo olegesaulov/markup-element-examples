@@ -1,3 +1,4 @@
+import { AUTOPLAY_DIRS, DISTANCE_TO_SWIPE } from "./constant.js";
 import { validateParams, validateUpdatedParams } from "./validator.js";
 import { CarouselDOM } from "./DOM.js";
 
@@ -12,7 +13,8 @@ const defaultOptions = {
     enableCycleNav: true,
     enableAutoplay: true,
     autoplaySpeed: 3000,
-    autoplayDir: 'ltr',
+    autoplayDir: AUTOPLAY_DIRS.LTR,
+    distanceToSwipe: DISTANCE_TO_SWIPE.LG,
 };
 
 export class Carousel {
@@ -90,14 +92,43 @@ export class Carousel {
     */
 
     _recalcAdditionalParams() {
+        const calcDistanceToSwipePX = (slideWidth) => {
+            const { distanceToSwipe } = this._params;
+
+            switch (distanceToSwipe) {
+                case DISTANCE_TO_SWIPE.XXXS:
+                    return slideWidth / 100; // 1%
+                case DISTANCE_TO_SWIPE.XXS:
+                    return slideWidth / 50; // 2%
+                case DISTANCE_TO_SWIPE.XS:
+                    return slideWidth / 33.333; // 3%
+                case DISTANCE_TO_SWIPE.SM:
+                    return slideWidth / 20; // 5%
+                case DISTANCE_TO_SWIPE.MD:
+                    return slideWidth / 13.333; // 7.5%
+                case DISTANCE_TO_SWIPE.LG:
+                    return slideWidth / 10; // 10%
+                case DISTANCE_TO_SWIPE.XL:
+                    return slideWidth / 5; // 20%
+                case DISTANCE_TO_SWIPE.XXL:
+                    return slideWidth / 4; // 25%
+                case DISTANCE_TO_SWIPE.XXXL:
+                    return slideWidth / 3; // 33%
+                default:
+                    return;
+            }
+        }
+
         this._params = {
             ...this._params,
             activeSlide: 0,
             itemWidth: this._getItemWidth(),
             itemsCount: this._elements.items.length,
+            slideWidth: this._getItemWidth() * this._params.itemsPerSlide,
             slidesCount: 1 + Math.ceil(
                 (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
             ),
+            distanceToSwipePX: calcDistanceToSwipePX(this._getItemWidth() * this._params.itemsPerSlide),
         };
     }
 
@@ -111,7 +142,7 @@ export class Carousel {
             slidesCount,
             itemsCount,
             itemWidth,
-            itemsPerSlide,
+            slideWidth,
             itemsPerScroll,
         } = this._params;
 
@@ -120,7 +151,7 @@ export class Carousel {
         }
 
         if (activeSlide === slidesCount - 1) {
-            return -(itemsCount * itemWidth) + (itemsPerSlide * itemWidth);
+            return -(itemsCount * itemWidth) + slideWidth;
         }
 
         return -activeSlide * (itemsPerScroll * itemWidth);
@@ -168,7 +199,7 @@ export class Carousel {
             return;
         }
 
-        const autoplayFunc = this._params.autoplayDir === 'ltr'
+        const autoplayFunc = this._params.autoplayDir === AUTOPLAY_DIRS.LTR
             ? this._onNextArrowClick
             : this._onPrevArrowClick;
         this._interval = setInterval(() => autoplayFunc(false), this._params.autoplaySpeed);
@@ -244,8 +275,36 @@ export class Carousel {
         this._updateTrackPosition(this._getTrackPosition());
     }
 
+    _onTrackPointerDown = (event) => {
+        event.preventDefault(); // prevent selection start (browser action)
+        this._params.clientXSlideChanged = event.clientX;
+        this._elements.track.setPointerCapture(event.pointerId);
+    }
+
+    _onTrackPointerMove = (event) => {
+        const { clientXSlideChanged, distanceToSwipePX } = this._params;
+
+        if (clientXSlideChanged === undefined || clientXSlideChanged === null) {
+            return;
+        }
+
+        if (clientXSlideChanged - event.clientX <= -distanceToSwipePX) {
+            this._params.clientXSlideChanged = event.clientX;
+            this._onPrevArrowClick();
+        }
+
+        if (clientXSlideChanged - event.clientX >= distanceToSwipePX) {
+            this._params.clientXSlideChanged = event.clientX;
+            this._onNextArrowClick();
+        }
+    }
+
+    _onTrackPointerUp = (event) => {
+        this._params.clientXSlideChanged = null;
+    }
+
     _initEventHandlers() {
-        const { arrowPrev, arrowNext, dotsContainer } = this._elements;
+        const { arrowPrev, arrowNext, dotsContainer, track } = this._elements;
 
         arrowPrev?.addEventListener("click", () => this._onPrevArrowClick());
 
@@ -258,6 +317,11 @@ export class Carousel {
 
             this._onDotClick(event.target);
         });
+
+        track.ondragstart = () => false; // prevent drag&drop start (browser action)
+        track.onpointerdown = this._onTrackPointerDown;
+        track.onpointermove = this._onTrackPointerMove;
+        track.onpointerup = this._onTrackPointerUp;
 
         document.removeEventListener("keydown", this._onKeydown);
         document.addEventListener("keydown", this._onKeydown);
