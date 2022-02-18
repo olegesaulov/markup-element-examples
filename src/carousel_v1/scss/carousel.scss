@@ -1,4 +1,14 @@
-.carousel {
+$carouselClassName: "carousel";
+
+$carouselArrowColorActive: #fff;
+$carouselArrowColorDisabled: #ccc;
+
+$carouselDotColorBackground: transparent;
+$carouselDotColorBorder: #aaa;
+$carouselDotColorBackgroundActive: #aaa;
+$carouselDotColorBorderActive: #aaa;
+
+.#{$carouselClassName} {
     &__arrow {
         position: absolute;
         top: 50%;
@@ -6,7 +16,7 @@
         height: 0;
 
         padding: 10px;
-        border: solid #fff;
+        border: solid $carouselArrowColorActive;
         border-width: 0 10px 10px 0;
 
         z-index: 1;
@@ -17,7 +27,7 @@
 
         &:disabled {
             cursor: default;
-            border: solid #ccc;
+            border: solid $carouselArrowColorDisabled;
             border-width: 0 10px 10px 0;
         }
     }
@@ -51,13 +61,15 @@
     &__dot {
         width: 10px;
         height: 10px;
+        background-color: $carouselDotColorBackground;
+        border: 1px solid $carouselDotColorBorder;
         border-radius: 50%;
-        border: 1px solid #aaa;
         margin: 5px;
         cursor: pointer;
 
         &--active {
-            background-color: #aaa;
+            background-color: $carouselDotColorBackgroundActive;
+            border: 1px solid $carouselDotColorBorderActive;
         }
     }
 
@@ -66,7 +78,7 @@
         position: relative;
 
         &:hover {
-            .carousel__arrow {
+            .#{$carouselClassName}__arrow {
                 opacity: 1;
                 visibility: visible;
             }
@@ -80,6 +92,7 @@
         touch-action: none;
     }
 
+    // example style - you probably should write your own
     &__item {
         display: flex;
         justify-content: center;

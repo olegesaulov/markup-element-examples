@@ -14,6 +14,7 @@ const defaultOptions = {
     enableAutoplay: true,
     autoplaySpeed: 3000,
     autoplayDir: AUTOPLAY_DIRS.LTR,
+    enableSwipe: true,
     distanceToSwipe: DISTANCE_TO_SWIPE.LG,
 };
 
@@ -318,10 +319,17 @@ export class Carousel {
             this._onDotClick(event.target);
         });
 
-        track.ondragstart = () => false; // prevent drag&drop start (browser action)
-        track.onpointerdown = this._onTrackPointerDown;
-        track.onpointermove = this._onTrackPointerMove;
-        track.onpointerup = this._onTrackPointerUp;
+        if (this._params.enableSwipe) {
+            track.ondragstart = () => false; // prevent drag&drop start (browser action)
+            track.onpointerdown = this._onTrackPointerDown;
+            track.onpointermove = this._onTrackPointerMove;
+            track.onpointerup = this._onTrackPointerUp;
+        } else {
+            track.ondragstart = () => { };
+            track.onpointerdown = () => { };
+            track.onpointermove = () => { };
+            track.onpointerup = () => { };
+        }
 
         document.removeEventListener("keydown", this._onKeydown);
         document.addEventListener("keydown", this._onKeydown);
