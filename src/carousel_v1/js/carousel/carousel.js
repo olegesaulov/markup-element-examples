@@ -125,7 +125,6 @@ export class Carousel {
             activeSlide: 0,
             itemWidth: this._getItemWidth(),
             itemsCount: this._elements.items.length,
-            slideWidth: this._getItemWidth() * this._params.itemsPerSlide,
             slidesCount: 1 + Math.ceil(
                 (this._elements.items.length - this._params.itemsPerSlide) / this._params.itemsPerScroll
             ),
@@ -143,7 +142,6 @@ export class Carousel {
             slidesCount,
             itemsCount,
             itemWidth,
-            slideWidth,
             itemsPerScroll,
         } = this._params;
 
@@ -152,7 +150,7 @@ export class Carousel {
         }
 
         if (activeSlide === slidesCount - 1) {
-            return -(itemsCount * itemWidth) + slideWidth;
+            return -(itemsCount * itemWidth) + this._elements.content.clientWidth;
         }
 
         return -activeSlide * (itemsPerScroll * itemWidth);
