@@ -1,0 +1,41 @@
+@import "fonts.scss";
+@import "constants.scss";
+@import "reset.scss";
+
+body {
+    &.lock {
+        overflow: hidden;
+    }
+}
+
+.wrapper {
+    overflow: hidden;
+    min-height: 100%;
+}
+
+.container {
+    max-width: $containerWidth;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.ibg {
+    position: relative;
+
+    img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+@import "content/header.scss";
+
+.content {
+    width: 100%;
+    height: 100%;
+    background-color: lightgreen;
+}

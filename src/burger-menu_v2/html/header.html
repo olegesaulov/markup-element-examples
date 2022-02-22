@@ -1,0 +1,51 @@
+<header class="header">
+    <div class="container">
+        <div class="header__body">
+
+            <div class="header__logo header-logo">
+                <p class="header-logo__text header-logo__text--top">NY<span>C'S</span></p>
+                <div class="header-logo__img">
+                    <img src="@img/logo.png" alt="logo"/>
+                </div>          
+                <p class="header-logo__text header-logo__text--bottom">Catering</p>
+            </div>
+
+            <div class="header__top top-header">
+                @@include('./components/burger.html', {
+                    "className": "top-header__burger"
+                })
+                <div class="top-header__langs header-langs">
+                    <span class="header-langs__item header-langs__item--active">EN</span>
+                    <span class="header-langs__item">RU</span>
+                    <span class="header-langs__item">ESP</span>
+                </div>
+                <a href="#" class="top-header__link">Online ordering</a>            
+            </div>    
+     
+            <div class="header__buttom bottom-header">
+                <nav class="bottom-header__menu menu-header">
+                    <ul class="menu-header__list">
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">about</a>
+                        </li>
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">menus</a>
+                        </li>
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">service info</a>
+                        </li>
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">gallery</a>
+                        </li>
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">friends</a>
+                        </li>
+                        <li class="menu-header__item">
+                            <a href="#" class="menu-header__link">contact</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>        
+    </div>
+</header>
