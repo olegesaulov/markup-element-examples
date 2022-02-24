@@ -5,3 +5,4 @@ Markup element examples:
 - carousel
 - tabs
 - accordion
+- dropdown
