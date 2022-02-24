@@ -1,0 +1,111 @@
+$boxShadow: 0 3px 6px -4px #0000001f, 0 6px 16px #00000014, 0 9px 28px 8px #0000000d;
+
+.header {
+    padding: 20px;
+
+    &__menu {
+    }
+
+    a {
+        display: inline-block;
+        min-width: 200px;
+        font-size: 24px;
+        line-height: 150%;
+        color: #000;
+    }
+}
+
+.menu {
+    &__list {
+        display: flex;
+    }
+
+    &__list-item {
+        position: relative;
+
+        & + & {
+            margin-left: 20px;
+        }
+
+        &:hover {
+            & > .sub-menu {
+                display: block;
+            }
+        }
+    }
+
+    &__link {
+    }
+}
+
+.sub-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: max-content;
+    padding: 10px 0 0 0;
+
+    &__list {
+        box-shadow: $boxShadow;
+    }
+
+    &__item {
+        position: relative;
+
+        & + & {
+            border-top: 1px solid #000;
+        }
+
+        &:hover {
+            & > .nested-menu {
+                display: block;
+            }
+        }
+    }
+
+    &__link {
+        background: #aaa;
+        padding: 10px;
+
+        &:hover {
+            background: lightslategray;
+        }
+    }
+}
+
+.nested-menu {
+    display: none;
+    position: absolute;
+    top: 10px;
+    left: 100%;
+    width: max-content;
+    padding: 0 0 0 20px;
+
+    &__list {
+        box-shadow: $boxShadow;
+    }
+
+    &__item {
+        position: relative;
+
+        & + & {
+            border-top: 1px solid #000;
+        }
+
+        &:hover {
+            & > .nested-menu {
+                display: block;
+            }
+        }
+    }
+
+    &__link {
+        background: lightcyan;
+        padding: 10px;
+
+        &:hover {
+            background: lightblue;
+        }
+    }
+}
