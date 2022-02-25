@@ -7,3 +7,4 @@ Markup element examples:
 - accordion
 - dropdown
 - select
+- tooltip
