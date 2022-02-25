@@ -1,0 +1,120 @@
+.tooltip-example {
+    padding-top: 100px;
+
+    &__title {
+        font-size: 32px;
+        line-height: 150%;
+        padding: 0px 0px 50px 0px;
+        text-align: center;
+    }
+
+    &__body {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+
+        & > div {
+            cursor: pointer;
+        }
+    }
+}
+
+.tooltip-container {
+    position: relative;
+
+    .tooltip {
+        position: absolute;
+        width: 100%;
+        max-width: 200px;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        background: #555;
+        color: #fff;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: all 0.3s;
+
+        &--top {
+            top: unset;
+            right: unset;
+            bottom: calc(100% + 0.7rem);
+            left: 50%;
+            transform: translateX(-50%);
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                transform: translateX(-50%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: #555 transparent transparent transparent;
+            }
+        }
+
+        &--right {
+            top: 50%;
+            right: unset;
+            bottom: unset;
+            left: calc(100% + 0.7rem);
+            transform: translateY(-50%);
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                transform: translate(-100%, -50%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent #555 transparent transparent;
+            }
+        }
+
+        &--bottom {
+            top: calc(100% + 0.7rem);
+            right: unset;
+            bottom: unset;
+            left: 0;
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translate(-50%, -100%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent #555 transparent;
+            }
+        }
+
+        &--left {
+            top: 50%;
+            right: calc(100% + 0.7rem);
+            bottom: unset;
+            left: unset;
+            transform: translateY(-50%);
+
+            &::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 100%;
+                transform: translateY(-50%);
+                border-width: 5px;
+                border-style: solid;
+                border-color: transparent transparent transparent #555;
+            }
+        }
+    }
+
+    &:hover {
+        .tooltip {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
