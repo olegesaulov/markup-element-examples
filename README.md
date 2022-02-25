@@ -6,3 +6,4 @@ Markup element examples:
 - tabs
 - accordion
 - dropdown
+- select
