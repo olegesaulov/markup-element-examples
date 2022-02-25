@@ -8,3 +8,4 @@ Markup element examples:
 - dropdown
 - select
 - tooltip
+- popup
