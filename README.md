@@ -1,5 +1,5 @@
-# markup-element-examples
-Markup element examples:
+# ui-element-examples
+UI element examples:
 - burger menu (2 versions)
 - cascade menu
 - carousel
