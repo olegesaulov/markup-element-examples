@@ -9,3 +9,4 @@ UI element examples:
 - select
 - tooltip
 - popup
+- modal
